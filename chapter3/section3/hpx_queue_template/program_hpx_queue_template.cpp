@@ -1,13 +1,11 @@
-#include "myqueue_client.hpp"
+#include "queue_client.hpp"
 #include <hpx/hpx.hpp>
 #include <hpx/hpx_main.hpp>
 #include <hpx/iostream.hpp>
 
 
-
 class Object {
 public:
-    Object() = default;
     void setA(int a) {
         this->a = a;
     }
@@ -27,7 +25,7 @@ public:
     std::string getC(){
         return c;
     }
-    //friend class hpx::serialization::access;
+    
     template <typename Archive>
     void serialize(Archive& ar, unsigned) {   
         ar& a;
@@ -36,17 +34,18 @@ public:
     }
 
 private:
+    friend class hpx::serialization::access;
     int a = 1;
     double b = 1.1;
     std::string c = "1.2";
 };
 
-REGISTER_MYQUEUE(Object);
+REGISTER_QUEUE(Object);
 
 int main(int argc, char* argv[]) {
     
     hpx::id_type locality = hpx::find_here();
-    MyQueue_Client<Object> myqueue(locality);
+    Queue_Client<Object> myqueue(locality);
     Object objA; Object objB; Object objC;
     
     auto f1 = myqueue.Push(objA);
@@ -58,6 +57,6 @@ int main(int argc, char* argv[]) {
 
     f3.then([&myqueue](auto f3){ 
         auto size = myqueue.Size();
-        std::cout << size.get() << std::endl; // irá imprimir 2
+        hpx::cout << size.get() << hpx::endl; // irá imprimir 2
     }).get();
 }

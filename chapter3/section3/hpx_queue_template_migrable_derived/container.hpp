@@ -1,4 +1,3 @@
-
 #include <hpx/hpx.hpp>
 
 
@@ -8,14 +7,12 @@ class Container: public hpx::components::abstract_base_migration_support< hpx::c
 public:
     typedef hpx::components::abstract_base_migration_support< hpx::components::abstract_component_base<Container> > base_type;
 
-    Container(); // needed by hpx for serialization
-    virtual ~Container();
-    Container(int _id);
+    Container(int id = 42) :
+        _id(id)
+    {}
 
-    // Components which should be migrated using hpx::migrate<> need to
-    // be Serializable and CopyConstructable. Components can be
-    // MoveConstructable in which case the serialized data is moved into the
-    // component's constructor.
+    virtual ~Container() = default;;
+    
     Container(Container const& rhs)
       : base_type(rhs), _id(rhs._id)
     {}
@@ -35,10 +32,10 @@ public:
         return *this;
     }
 
-    virtual int GetID() const;
-    int GetID_nonvirt() const;
+    virtual int GetId() const;
+    int GetId_nonvirt() const;
 
-    HPX_DEFINE_COMPONENT_ACTION(Container, GetID_nonvirt, GetID_action_Container);
+    HPX_DEFINE_COMPONENT_ACTION(Container, GetId_nonvirt, GetId_action_Container);
     
     template <typename Archive>
     void serialize(Archive& ar, unsigned version)
@@ -47,8 +44,9 @@ public:
     }
 
 private:
+    friend class hpx::serialization::access;
     int _id;
 };
 
-typedef Container::GetID_action_Container GetID_action_Container;
-HPX_REGISTER_ACTION_DECLARATION(GetID_action_Container);
+typedef Container::GetId_action_Container GetId_action_Container;
+HPX_REGISTER_ACTION_DECLARATION(GetId_action_Container);

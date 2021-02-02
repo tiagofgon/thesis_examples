@@ -5,7 +5,7 @@ find_package(HPX REQUIRED)
 
 add_hpx_executable(program_hpx_queue_template_migrable
     SOURCES program_hpx_queue_template_migrable.cpp
-    HEADERS myqueue.hpp myqueue_client.hpp
+    HEADERS queue.hpp queue_client.hpp
     COMPONENT_DEPENDENCIES iostreams)
 
 # add dependencies to pseudo-target

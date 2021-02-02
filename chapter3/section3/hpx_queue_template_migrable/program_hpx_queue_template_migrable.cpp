@@ -1,4 +1,4 @@
-#include "myqueue_client.hpp"
+#include "queue_client.hpp"
 #include <hpx/hpx.hpp>
 #include <hpx/hpx_main.hpp>
 #include <hpx/iostream.hpp>
@@ -7,7 +7,6 @@
 
 class Object {
 public:
-    Object() = default;
     void setA(int a) {
         this->a = a;
     }
@@ -27,7 +26,7 @@ public:
     std::string getC(){
         return c;
     }
-    //friend class hpx::serialization::access;
+    
     template <typename Archive>
     void serialize(Archive& ar, unsigned) {   
         ar& a;
@@ -36,43 +35,35 @@ public:
     }
 
 private:
+    friend class hpx::serialization::access;
     int a = 1;
     double b = 1.1;
     std::string c = "1.2";
 };
 
-REGISTER_MYQUEUE(Object);
-REGISTER_MYQUEUE(int);
 
+REGISTER_QUEUE(Object);
 
 int main(int argc, char* argv[]) {
-    
-    if(hpx::get_locality_id() != 0) {
-        hpx::lcos::barrier barrier("barreira444", 2);
-        barrier.wait();
-        return 0;
-    }
-
 
     hpx::id_type locality = hpx::find_here();
-    MyQueue_Client<Object> myqueue(locality);
+    Queue_Client<Object> myqueue(locality);
     Object objA; Object objB; Object objC;
     
     myqueue.Push(objA).get();
     myqueue.Push(objB).get();
     myqueue.Push(objC).get();
 
-    // std::vector<hpx::id_type> remote_localities = hpx::find_remote_localities();
-    // hpx::id_type dest = remote_localities[0];
-    // myqueue.Migrate(dest).get();
+    // migrar o componente para a localidade seguinte
+    if(hpx::get_num_localities().get() > 1) {
+        std::vector<hpx::id_type> remote_localities = hpx::find_remote_localities();
+        hpx::id_type dest = remote_localities[0];
+        hpx::components::migrate<Queue<Object>>(myqueue.get_gid(), dest);
+    }
 
-    myqueue.Pop().get();
+    auto element = myqueue.Pop().get();
     
-    auto size = myqueue.Size();
-    std::cout << size.get() << std::endl; // irá imprimir 1
+    hpx::cout << myqueue.Size().get() << hpx::endl; // irá imprimir 2
 
-
-    // hpx::lcos::barrier barrier("barreira444", 2);
-    // barrier.wait();
     return 0;
 }
