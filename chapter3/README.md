@@ -3,7 +3,7 @@
 ~~~
 mkdir build
 cd build
-cmake -DHPX_WITH_CXX17=On -DCMAKE_PREFIX_PATH=$HPX_LOCATION ..
+cmake -DHPX_CXX_STANDARD=17 -DCMAKE_PREFIX_PATH=$HPX_LOCATION ..
 ~~~
 for a specific section, for example: <br />
 ~~~
