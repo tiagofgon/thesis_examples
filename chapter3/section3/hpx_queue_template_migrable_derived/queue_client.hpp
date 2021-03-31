@@ -11,6 +11,8 @@ public:
 	{}
 	Queue_Client(hpx::id_type locality, int id) : base_type(hpx::new_<Queue<T>>(locality, id))
 	{}
+	Queue_Client(hpx::id_type locality) : base_type(hpx::new_<Queue<T>>(locality))
+	{}
 
 	template <typename ... Args>
 	hpx::future<void> Push(Args ... args)
